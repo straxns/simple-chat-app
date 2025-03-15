@@ -1,0 +1,23 @@
+<form class="container" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <h1>Join to simple chat app</h1>
+  <input type="text" formControlName="user" placeholder="Enter your nickname(from 2 to 50 characters)">
+  <!-- todo - add indication for status - available, pending, unavailable -->
+   @if(loadingStatus === 'available'){
+    <div>
+      <img src="unread.svg" style="filter: opacity(0.5); background-color: green;">
+      <p>Username available</p>
+    </div>
+   } @else if (loadingStatus === 'pending') {
+    <div>
+      <img src="spinner.svg"  style="filter: opacity(0.5)">
+      <p>Loading...</p>
+    </div>
+   }
+   @else if (loadingStatus === 'unavailable') {
+    <div>
+      <img src="unread.svg"  style="filter: opacity(0.5); background-color: red;">
+      <p>Username unavailable</p>
+    </div>
+   }
+  <button [disabled]="this.form.invalid">JOIN</button>
+</form>
