@@ -8,9 +8,18 @@ import { HttpClient } from '@angular/common/http';
 export class UserService {
   http = inject(HttpClient);
   createUser(username: string){
-    this.http.post('',{username});
+    return this.http.post<User>('http://localhost:5000/api/users/register-guest',{username});
   }
   checkUsername(username: string){
-    this.http.get('');
+    return this.http.get<{available: boolean}>(`http://localhost:5000/api/users/check-username?username=${username}`);
+  }
+  setUser(user: User){
+    window.sessionStorage.setItem('user', JSON.stringify(user));
+  }
+  getUser(): User {
+    return JSON.parse(window.sessionStorage.getItem('user') ?? "{}");
+  }
+  checkUser(): boolean{
+    return !!this.getUser().username;
   }
 }

@@ -2,6 +2,14 @@
   background-color: #D9F0B3;
   display: flex;
   flex-direction: column;
+  padding: 1rem;
+}
+:host{
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 h1{
   text-align: center;
@@ -17,7 +25,6 @@ input{
   border: none;
   border-radius: 1rem;
   box-shadow:inset 0 0 10px #58683e;
-    // background: transparent;
 }
 
 ::placeholder {
@@ -50,9 +57,40 @@ div{
   display: flex;
   flex-direction: row;
 }
+p{
+  color: white;
+}
 img{
   // position: absolute;
   margin: 1rem;
   width: 16px;
   height: 16px;
+}
+dialog{
+  background-color: #D9F0B3;
+  border-radius: 1rem;
+  border: unset;
+  margin: auto;
+  min-width: 60vw;
+}
+dialog::backdrop {
+  background-color: #58683e;
+  backdrop-filter: blur(2px);
+}
+.loadingMessage{
+  margin: 1rem;
+}
+
+.loader {
+  border: 0.5rem solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 0.5rem solid white;
+  width: 1rem;
+  height: 1rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

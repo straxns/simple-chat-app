@@ -1,0 +1,10 @@
+<div class="container">
+  <h1>{{message().senderName}}</h1>
+  <p class="content">{{message().content}}</p>
+  <div class="footer">
+    <p>{{message().timestamp | date: 'short'}}</p>
+    <!-- <img [src]="message().seen ? 'read.svg' : 'unread.svg'" alt=""> -->
+     <p class="seen">{{message().seen ? '✓✓' : '✓'}}</p>
+  </div>
+</div>
+

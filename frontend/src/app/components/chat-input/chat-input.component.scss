@@ -1,0 +1,15 @@
+:host{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+input{
+  margin: 1rem;
+  padding: 1rem;
+  background-color: #b2d47c;
+  font-size: medium;
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  box-shadow:inset 0 0 10px #8FAA65;
+}

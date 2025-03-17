@@ -1,0 +1,28 @@
+h1{
+  color: white;
+  font-size: 1.2rem;
+  margin: 0 1.2rem;
+}
+.container{
+  border-radius: 1rem;
+  background-color: #b2d47c;
+  box-shadow: 0 0 10px #58683e;
+  margin: 1rem;
+  padding: 1rem;
+}
+.content{
+  color: white;
+  margin: 1.2rem;
+  font-size: 1.1rem;
+}
+.footer{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: white;
+  margin: 0 1rem;
+  font-size: 0.8rem;
+}
+.seen{
+  font-weight: bold;
+}

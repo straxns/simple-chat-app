@@ -1,0 +1,15 @@
+<h1>Chat app</h1>
+<article>
+@for(message of messages; track $index){
+  @defer (on viewport) {
+    <app-message [message]="message" />
+  }
+  @placeholder {
+    <p>Loading...</p>
+  }
+}
+</article>
+<footer>
+  <app-chat-input [(content)]="newMessage" (keyup.enter)="sendMessage()"/>
+</footer>
+
