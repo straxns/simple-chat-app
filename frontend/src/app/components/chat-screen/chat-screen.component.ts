@@ -34,8 +34,7 @@ export class ChatScreenComponent implements OnInit{
 
     this.socketService.userNotFound().subscribe(() => {
       this.userService.removeUser();
-      this.router.navigate(['chat']);
-
+      this.router.navigate(['/']);
     });
     this.socketService.onNewMessage().subscribe((message) => {
       this.messages.push(message);

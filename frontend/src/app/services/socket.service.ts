@@ -34,7 +34,6 @@ export class SocketService {
         observer.next(null);
       });
     });
-
   }
 
   onUserLeft(): Observable<string> {
