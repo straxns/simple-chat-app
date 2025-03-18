@@ -69,9 +69,10 @@ jobs:
           docker ps -a  # List all containers
           docker logs $(docker ps -q --filter "ancestor=mongo:5.0")
 
-      # Step 7: Start backend server
+      # Step 7: Start backend server in the background
       - name: Start backend server
-        run: npm start
+        run: |
+          nohup npm start --prefix ./backend &
         working-directory: ./backend
 
       # Step 8: Install frontend dependencies
