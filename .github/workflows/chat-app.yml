@@ -16,38 +16,39 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'" 
-          --health-interval 10s --health-timeout 5s --health-retries 5
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'" --quiet
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       # Step 1: Checkout code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Step 2: Set up Node.js
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 20
 
       # Step 3: Install backend dependencies
       - name: Install backend dependencies
         run: npm install
-        working-directory: ./backend
+        working-directory: backend
 
       # Step 4: Create .env file securely
       - name: Create .env file
         run: |
-          echo "PORT=${{ secrets.PORT }}" >> .env
-          echo "MONGO_URI=mongodb://localhost:27017/chat-app" >> .env
-          echo "USER_INACTIVE=${{ secrets.USER_INACTIVE }}" >> .env
-        working-directory: ./backend
+          echo "PORT=${{ secrets.PORT }}" >> backend/.env
+          echo "MONGO_URI=mongodb://localhost:27017/chat-app" >> backend/.env
+          echo "USER_INACTIVE=${{ secrets.USER_INACTIVE }}" >> backend/.env
 
-      # Step 5: Wait for MongoDB (Fixed)
+      # Step 5: Wait for MongoDB to be ready
       - name: Wait for MongoDB
         run: |
           for i in {1..30}; do
-            if mongo --eval "db.runCommand({ ping: 1 })" --quiet; then
+            if mongosh --eval "db.runCommand({ ping: 1 })" --quiet; then
               echo "MongoDB is ready!"
               exit 0
             fi
@@ -57,7 +58,7 @@ jobs:
           echo "MongoDB failed to start"
           exit 1
 
-      # Step 6: Debug MongoDB logs on failure (Fixed)
+      # Step 6: Debug MongoDB logs on failure
       - name: Debug MongoDB logs
         if: failure()
         run: |
@@ -65,30 +66,37 @@ jobs:
           docker ps -a  # List all containers
           docker logs $(docker ps -q --filter "ancestor=mongo:latest")
 
-      # Step 7: Start backend server
+      # Step 7: Start backend server (Run in background)
       - name: Start backend server
-        run: npm start
-        working-directory: ./backend
+        run: nohup npm start &
+        working-directory: backend
 
       # Step 8: Install frontend dependencies
       - name: Install frontend dependencies
         run: npm install
-        working-directory: ./frontend
+        working-directory: frontend
 
       # Step 9: Build Angular frontend
       - name: Build Angular frontend
         run: npm run build -- --configuration production
-        working-directory: ./frontend
+        working-directory: frontend
 
-      # Step 10: Configure AWS CLI for deployment
+      # Step 10: Install AWS CLI (if not installed)
+      - name: Install AWS CLI
+        run: |
+          if ! command -v aws &> /dev/null; then
+            sudo apt update
+            sudo apt install -y awscli
+          fi
+
+      # Step 11: Configure AWS CLI
       - name: Configure AWS CLI
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region us-east-1
 
-      # Step 11: Deploy frontend
+      # Step 12: Deploy frontend to AWS S3
       - name: Deploy frontend
         run: |
-          aws s3 sync ./frontend/dist/my-angular-app s3://your-s3-bucket-name --delete
-        working-directory: ./frontend
+          aws s3 sync frontend/dist/my-angular-app s3://your-s3-bucket-name --delete
