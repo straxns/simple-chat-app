@@ -89,15 +89,4 @@ jobs:
         run: npm run build -- --configuration production
         working-directory: ./frontend
 
-      # Step 11: Configure AWS CLI for deployment
-      - name: Configure AWS CLI
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region us-east-1
-
-      # Step 12: Deploy frontend to AWS S3
-      - name: Deploy frontend
-        run: |
-          aws s3 sync ./frontend/dist/my-angular-app s3://your-s3-bucket-name --delete
-        working-directory: ./frontend
+      
