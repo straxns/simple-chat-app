@@ -16,11 +16,7 @@ jobs:
         image: mongo:latest
         ports:
           - 27017:27017
-        options: >-
-          --health-cmd "mongo --eval 'db.runCommand(\"ping\").ok'"
-          --health-interval 30s  # Increased interval
-          --health-timeout 10s   # Increased timeout
-          --health-retries 10    # Increased retries
+        options: --health-cmd "mongo --eval 'db.runCommand(\"ping\").ok'" --health-interval 30s --health-timeout 10s --health-retries 10
 
     steps:
       # Step 2: Checkout code
