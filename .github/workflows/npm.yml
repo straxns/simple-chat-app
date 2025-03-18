@@ -9,12 +9,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # Step 1: Set up MongoDB service container
     services:
       mongodb:
-        image: mongo:latest  # Use the latest MongoDB image
+        image: mongo:latest
         ports:
-          - 27017:27017      # Expose MongoDB on port 27017
+          - 27017:27017
         options: >-
           --health-cmd "mongo --eval 'db.runCommand(\"ping\").ok'"
           --health-interval 10s
@@ -22,21 +21,22 @@ jobs:
           --health-retries 5
 
     steps:
-      # Step 2: Checkout the code
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 3: Set up Node.js
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
-      # Step 4: Install backend dependencies
+          node-version: '18'
+
+      # Step 3: Install backend dependencies
       - name: Install backend dependencies
         run: npm install
         working-directory: ./backend
 
-      # Step 5: Create .env file for backend
+      # Step 4: Create .env file for backend
       - name: Create .env file
         run: |
           echo "PORT=5000" >> .env
@@ -44,23 +44,35 @@ jobs:
           echo "USER_INACTIVE=1*60*1000" >> .env
         working-directory: ./backend
 
-      # Step 6: Start backend server
+      # Step 5: Debug .env file
+      - name: Debug .env file
+        run: cat .env
+        working-directory: ./backend
+
+      # Step 6: Wait for MongoDB to be ready
+      - name: Wait for MongoDB to be ready
+        run: |
+          echo "Waiting for MongoDB to be ready..."
+          timeout 60 bash -c 'until mongo --eval "db.runCommand(\"ping\").ok" mongodb://localhost:27017/chat-app; do sleep 1; done'
+          echo "MongoDB is ready!"
+
+      # Step 7: Start backend server
       - name: Start backend server
         run: |
           npm start
         working-directory: ./backend
 
-      # Step 7: Install frontend dependencies
+      # Step 8: Install frontend dependencies
       - name: Install frontend dependencies
         run: npm install
         working-directory: ./frontend
 
-      # Step 8: Build Angular frontend
+      # Step 9: Build Angular frontend
       - name: Build Angular frontend
         run: npm run build -- --configuration production
         working-directory: ./frontend
 
-      # Step 9: Deploy frontend (example: to a server or S3)
+      # Step 10: Deploy frontend (example: to a server or S3)
       - name: Deploy frontend
         run: |
           # Add your deployment commands here
