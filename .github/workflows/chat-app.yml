@@ -12,15 +12,19 @@ jobs:
 
     # Step 1: Set up MongoDB service container
     services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongo --eval 'db.runCommand(\"ping\").ok'"
-          --health-interval 30s  # Increased interval
-          --health-timeout 10s   # Increased timeout
-          --health-retries 10    # Increased retries
+       mongodb:
+              image: mongo
+              env:
+                MONGO_INITDB_ROOT_USERNAME: test
+                MONGO_INITDB_ROOT_PASSWORD: password
+                MONGO_INITDB_DATABASE: test
+              options: >-
+                --health-cmd mongo
+                --health-interval 10s
+                --health-timeout 5s
+                --health-retries 5
+              ports:
+                - 27017:27017
 
     steps:
       # Step 2: Checkout code
