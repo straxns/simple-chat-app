@@ -17,9 +17,9 @@ jobs:
           - 27017:27017
         options: >-
           --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"
-          --health-interval 20s  # Increased health check interval
-          --health-timeout 10s   # Increased health check timeout
-          --health-retries 10    # Increased health check retries
+          --health-interval 20s
+          --health-timeout 10s
+          --health-retries 10
 
     steps:
       # Step 1: Checkout code
