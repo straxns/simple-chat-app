@@ -13,14 +13,14 @@ jobs:
     # Step 1: Set up MongoDB service container
     services:
       mongodb:
-        image: mongo:latest  # Use the latest MongoDB image
+        image: mongo:latest
         ports:
-          - 27017:27017      # Expose MongoDB on port 27017
+          - 27017:27017
         options: >-
           --health-cmd "mongo --eval 'db.runCommand(\"ping\").ok'"
-          --health-interval 30s
-          --health-timeout 10s
-          --health-retries 10 
+          --health-interval 30s  # Increased interval
+          --health-timeout 10s   # Increased timeout
+          --health-retries 10    # Increased retries
 
     steps:
       # Step 2: Checkout code
@@ -55,26 +55,33 @@ jobs:
       - name: Wait for MongoDB to be ready
         run: |
           echo "Waiting for MongoDB to be ready..."
+          sleep 30  # Wait for 30 seconds
           timeout 60 bash -c 'until mongo --eval "db.runCommand(\"ping\").ok" mongodb://localhost:27017/chat-app; do sleep 1; done'
           echo "MongoDB is ready!"
 
-      # Step 8: Start backend server
+      # Step 8: Debug MongoDB logs
+      - name: Debug MongoDB logs
+        run: |
+          echo "Fetching MongoDB container logs..."
+          docker logs $(docker ps -qf "name=mongodb")
+
+      # Step 9: Start backend server
       - name: Start backend server
         run: |
           npm start
         working-directory: ./backend
 
-      # Step 9: Install frontend dependencies
+      # Step 10: Install frontend dependencies
       - name: Install frontend dependencies
         run: npm install
         working-directory: ./frontend
 
-      # Step 10: Build Angular frontend
+      # Step 11: Build Angular frontend
       - name: Build Angular frontend
         run: npm run build -- --configuration production
         working-directory: ./frontend
 
-      # Step 11: Deploy frontend
+      # Step 12: Deploy frontend
       - name: Deploy frontend
         run: |
           # Add your deployment commands here
