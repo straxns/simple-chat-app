@@ -10,4 +10,5 @@ import { DatePipe } from '@angular/common';
 })
 export class MessageComponent {
   message = input.required<Message>();
+  userId = input<string>();
 }

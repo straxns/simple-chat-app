@@ -19,6 +19,9 @@ export class UserService {
   getUser(): User {
     return JSON.parse(window.sessionStorage.getItem('user') ?? "{}");
   }
+  removeUser() {
+    window.sessionStorage.removeItem('user')
+  }
   checkUser(): boolean{
     return !!this.getUser().username;
   }

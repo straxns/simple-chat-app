@@ -1,20 +1,22 @@
 <form class="container" [formGroup]="form" (ngSubmit)="onSubmit()">
   <h1>Join to simple chat app</h1>
   <input type="text" formControlName="user" placeholder="Enter your nickname(from 2 to 50 characters)">
-  @if(isLoadingCheckUsername()){
+  @if(availableName() ===null){
+    <div class="empty-div"></div>
+  }
+  @else if(isLoadingCheckUsername()){
     <div>
-      <div class="loader loadingMessage"></div>
-      <p>Loading...</p>
+      <div class="loader"></div>
     </div>
    }
-   @else if (!isLoadingCheckUsername() && availableName() !==undefined && availableName()) {
+   @else if (!isLoadingCheckUsername()&& availableName() !==null  && availableName()) {
     <div class="loadingMessage">
       <p>✓ - Username available</p>
     </div>
    }
-   @else if (!isLoadingCheckUsername() && availableName() !==undefined && !availableName()) {
+   @else if (!isLoadingCheckUsername() && availableName() !==null && !availableName()) {
     <div class="loadingMessage">
-      <p>X - Username unavailable</p>
+      <p>✕ - Username unavailable</p>
     </div>
    }
    <div style="height: 3rem;"></div>

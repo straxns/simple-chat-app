@@ -15,7 +15,7 @@ export class JoinGuestComponent implements OnInit, AfterViewInit {
   userService = inject(UserService);
   router= inject(Router);
   isLoadingCheckUsername = signal<boolean>(false);
-  availableName = signal<boolean | undefined>(undefined);
+  availableName = signal<boolean | null>(null);
   private destroyRef = inject(DestroyRef);
   form = new FormGroup({
     user: new FormControl('', {
@@ -28,15 +28,14 @@ export class JoinGuestComponent implements OnInit, AfterViewInit {
     let subscriptionCheckUsername: Subscription | undefined;
     const subscription = this.form.valueChanges.pipe(debounceTime(500)).subscribe({
       next: value => {
-        if(!value) {
-          this.availableName.set(undefined);
+        if(this.form.invalid) {
+          this.availableName.set(null);
           return;
         }
         this.isLoadingCheckUsername.set(true);
         subscriptionCheckUsername = this.userService.checkUsername(value.user ?? '').subscribe({
           next: (usernameAvailable) => {
             this.availableName.set(usernameAvailable.available)
-            console.log(usernameAvailable);
           },
           complete:() => this.isLoadingCheckUsername.set(false)
         })
@@ -61,6 +60,5 @@ export class JoinGuestComponent implements OnInit, AfterViewInit {
          this.router.navigate(['chat']);
         }
     });
-
   }
 }
