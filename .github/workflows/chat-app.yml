@@ -10,77 +10,87 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # Step 1: Set up MongoDB service container
     services:
       mongodb:
         image: mongo:latest
         ports:
           - 27017:27017
-        options: --health-cmd "mongo --eval 'db.runCommand(\"ping\").ok'" --health-interval 30s --health-timeout 10s --health-retries 10
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: example
+        options: >-
+          --health-cmd "mongosh --host localhost --eval 'db.runCommand({ ping: 1 })'" 
+          --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      # Step 2: Checkout code
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 3: Set up Node.js
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 22.x
+          node-version: 20.x  # Use latest stable LTS version
 
-      # Step 4: Install backend dependencies
+      # Step 3: Install backend dependencies
       - name: Install backend dependencies
         run: npm install
         working-directory: ./backend
 
-      # Step 5: Create .env file for backend
+      # Step 4: Create .env file securely
       - name: Create .env file
         run: |
           echo "PORT=${{ secrets.PORT }}" >> .env
-          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+          echo "MONGO_URI=mongodb://root:example@localhost:27017/chat-app" >> .env
           echo "USER_INACTIVE=${{ secrets.USER_INACTIVE }}" >> .env
         working-directory: ./backend
 
-      # Step 6: Debug .env file
-      - name: Debug .env file
-        run: cat .env
-        working-directory: ./backend
-
-      # Step 7: Wait for MongoDB to be ready
+      # Step 5: Wait for MongoDB to be ready (Improved Retry Logic)
       - name: Wait for MongoDB to be ready
         run: |
-          echo "Waiting for MongoDB to be ready..."
-          sleep 30  # Wait for 30 seconds
-          timeout 60 bash -c 'until mongo --eval "db.runCommand(\"ping\").ok" mongodb://localhost:27017/chat-app; do sleep 1; done'
-          echo "MongoDB is ready!"
+          for i in {1..30}; do
+            if mongosh --host localhost --eval "db.runCommand({ ping: 1 })" --quiet; then
+              echo "MongoDB is ready!"
+              exit 0
+            fi
+            echo "Waiting for MongoDB..."
+            sleep 2
+          done
+          echo "MongoDB failed to start"
+          exit 1
 
-      # Step 8: Debug MongoDB logs
+      # Step 6: Debug MongoDB logs if it fails
       - name: Debug MongoDB logs
+        if: failure()
         run: |
           echo "Fetching MongoDB container logs..."
           docker logs $(docker ps -qf "name=mongodb")
 
-      # Step 9: Start backend server
+      # Step 7: Start backend server
       - name: Start backend server
-        run: |
-          npm start
+        run: npm start
         working-directory: ./backend
 
-      # Step 10: Install frontend dependencies
+      # Step 8: Install frontend dependencies
       - name: Install frontend dependencies
         run: npm install
         working-directory: ./frontend
 
-      # Step 11: Build Angular frontend
+      # Step 9: Build Angular frontend
       - name: Build Angular frontend
         run: npm run build -- --configuration production
         working-directory: ./frontend
 
-      # Step 12: Deploy frontend
+      # Step 10: Configure AWS CLI for deployment
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region us-east-1
+
+      # Step 11: Deploy frontend (Ensure correct S3 bucket)
       - name: Deploy frontend
         run: |
-          # Add your deployment commands here
-          # For example, if deploying to an S3 bucket:
           aws s3 sync ./frontend/dist/my-angular-app s3://your-s3-bucket-name --delete
         working-directory: ./frontend
